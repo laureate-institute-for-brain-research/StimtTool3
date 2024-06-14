@@ -102,11 +102,41 @@ def do_one_trial(trial_type, duration):
         tone_times = None
         next_tone = float('inf')
     
-    g.closed.draw()
-    g.win.flip()
+    if not g.run_params['vis_countdown']:
+        g.closed.draw()
+        g.win.flip()
     if trial_type != 3: #don't play the countdown for the breath hold trial--subjects will begin the trial at the end of inspiration        
-        g.countdown.play()
-        StimToolLib.just_wait(g.clock, g.clock.getTime() + g.countdown.getDuration())
+        if not g.run_params['vis_countdown']:
+            g.countdown.play()
+            StimToolLib.just_wait(g.clock, g.clock.getTime() + g.countdown.getDuration())
+        else:
+            g.count3.draw()
+            g.win.flip()
+            StimToolLib.just_wait(g.clock, g.clock.getTime() + 1)
+            g.count2.draw()
+            g.win.flip()
+            StimToolLib.just_wait(g.clock, g.clock.getTime() + 2)
+            g.count1.draw()
+            g.win.flip()
+            StimToolLib.just_wait(g.clock, g.clock.getTime() + 3)
+            g.go.draw()
+            g.win.flip()
+            StimToolLib.just_wait(g.clock, g.clock.getTime() + 4)
+            pass
+    elif g.run_params['vis_countdown']:
+        g.count3.draw()
+        g.win.flip()
+        StimToolLib.just_wait(g.clock, g.clock.getTime() + 1)
+        g.count2.draw()
+        g.win.flip()
+        StimToolLib.just_wait(g.clock, g.clock.getTime() + 2)
+        g.count1.draw()
+        g.win.flip()
+        StimToolLib.just_wait(g.clock, g.clock.getTime() + 3)
+        g.go.draw()
+        g.win.flip()
+        StimToolLib.just_wait(g.clock, g.clock.getTime() + 4)
+        pass
     
     start_time = g.clock.getTime()
     StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_ONSET'], start_time,  'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
@@ -217,8 +247,17 @@ def run_try():
     #g.instructions.append(visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'instructions', 'HC_T.PNG'), pos=[0,0], units='pix') ) #tone
     #g.instructions.append(visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'instructions', 'HC_NG.PNG'), pos=[0,0], units='pix') ) #no guess
     #g.instructions.append(visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'instructions', 'HC_B.PNG'), pos=[0,0], units='pix') ) #breath hold
-    g.instructions = ['HC_instruct_G.csv', 'HC_instruct_T.csv', 'HC_instruct_NG.csv', 'HC_instruct_B.csv']
+    if not g.run_params['vis_countdown'] and not g.run_params['new_instructions']:
+        g.instructions = ['HC_instruct_G.csv', 'HC_instruct_T.csv', 'HC_instruct_NG.csv', 'HC_instruct_B.csv']
+    elif g.run_params['new_instructions']:
+        g.instructions = ['HC_new_instruct_1.csv', 'HC_new_instruct_2.csv', 'HC_new_instruct_3.csv', 'HC_new_instruct_4.csv']
+    else:
+        g.instructions = ['HC_WB_instruct_1.csv', 'HC_WB_instruct_2.csv', 'HC_WB_instruct_3.csv', 'HC_WB_instruct_4.csv']
         
+    g.go = visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'CountGo.PNG'), pos=[0,0], units='pix')
+    g.count3 = visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'Count3.PNG'), pos=[0,0], units='pix')
+    g.count2 = visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'Count2.PNG'), pos=[0,0], units='pix')
+    g.count1 = visual.ImageStim(g.win, image=os.path.join(os.path.dirname(__file__),  'media', 'Count1.PNG'), pos=[0,0], units='pix')
         
         
     g.countdown = sound.Sound(value=os.path.join(os.path.dirname(__file__), 'media', 'countdown.aiff'), volume=g.session_params['instruction_volume'])
@@ -252,7 +291,8 @@ def run_try():
     instruct_start_time = g.clock.getTime()
     StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['INSTRUCT_ONSET'], instruct_start_time, 'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
     #show_intro_instructions()
-    StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', 'HC_instruct_schedule.csv'), g)
+    StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', g.run_params['instruction_schedule']), g)
+    # StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', 'HC_instruct_schedule.csv'), g)
     instruct_end_time = g.clock.getTime()
     StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['TASK_ONSET'], instruct_end_time, instruct_end_time - instruct_start_time, 'NA', 'NA', True, g.session_params['parallel_port_address'])
     g.trial = 0

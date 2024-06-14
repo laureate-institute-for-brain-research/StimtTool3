@@ -1,0 +1,5 @@
+TrialTypes (0:heart guess; 1:tone; 2:heart perception; 3:breath hold heart perception),Stimuli,Durations,ExtraArgs
+0,,60,
+1,,60,
+2,,60,
+3,,60,

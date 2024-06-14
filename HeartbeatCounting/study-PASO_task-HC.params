@@ -1,1 +1,4 @@
 run_id __HC-R1-_BEH
+instruction_schedule HC_instruct_schedule.csv
+vis_countdown False
+new_instructions False
