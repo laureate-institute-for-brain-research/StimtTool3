@@ -1,5 +1,9 @@
 README for the Cooperation Task
 
+!!! Notes for Operation: This task uses IAPS images that are not intended for public sharing. The following directory will need to be created and
+populated with the IAPS image set:
+    C:\StimTool3\Cooperation\media\outcome_media\images\
+
 *****************************************************************SUMMARY**************************************************************************
 
 The Cooperation Task (adapted from the three-armed bandit task) presents sets of three faces from validated face image databases and participants 
