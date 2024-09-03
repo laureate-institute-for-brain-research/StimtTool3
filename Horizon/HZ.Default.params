@@ -1,0 +1,5 @@
+run T
+practice False
+random_run False
+frame_time 0.08335
+instruction_schedule nb_instruct_schedule.csv

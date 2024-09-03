@@ -1,0 +1,17 @@
+run_id _COP_R1-_BEH
+task_name COOP
+param_file __IA-RX-PARA.txt
+practice False
+instruction_schedule coop_instruct_schedule_CB1R1.csv
+left 'left'
+right 'right'
+up 'up'
+down '4'
+select '3'
+image_x 0.55
+image_y 0.5
+image_height 0.5
+outcome_duration 1.0
+neg_media neg_outcome_media_neuro.schedule
+neut_media neut_outcome_media.schedule
+pos_media pos_outcome_media_neuro.schedule

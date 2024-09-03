@@ -1,0 +1,2 @@
+TrialTypes (<block size>_<order>_<forced order_<forced outcomes>),Stimuli (face1 face2 face3),Durations,ExtraArgs (GOODprobability1_probability2_probability3-SAFEprobability1_probability2_probability3-BADprobability1_probability2_probability3)
+8_bsg_bgs_LWN,media\AMFD_CFD_Faces\Group_43\CFD-WM-025-002-N.jpg media\AMFD_CFD_Faces\Group_43\CFD-WM-038-003-N.jpg media\AMFD_CFD_Faces\Group_43\CFD-WM-211-054-N.jpg,0.5,0.50_0.40_0.10-0.25_0.50_0.25-0.04_0.33_0.63

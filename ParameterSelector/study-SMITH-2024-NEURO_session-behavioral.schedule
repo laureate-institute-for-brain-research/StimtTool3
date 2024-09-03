@@ -1,0 +1,61 @@
+{
+"Session":{"T0":{"session_id":"T0"}, 
+            "T1":{"session_id":"T1"}},
+ "SCHEDULE":{"RUN-LEFT":{"scan": "False",
+                       "left":"left", 
+                       "right":"right", 
+                       "select":"space",
+                       "up":"up", 
+                       "down":"down",
+                       "joy_forward":2,
+                        "joy_backward":0,
+                        "handedness": "left",
+                       "order":[
+                         "Parameter Selector:run='study-SMITH-2024-NEURO_session-behavioral.schedule'",
+                         "Horizon:run='study-NEURO_task-HZ_run-R1_L.schedule'",
+                         "Cooperation:run='study-NEURO_task-CO_run-1.schedule'"
+                          ]},
+              "RUN-RIGHT":{"scan": "False",
+                       "left":"left", 
+                       "right":"right", 
+                       "select":"space",
+                       "up":"up", 
+                       "down":"down",
+                       "joy_forward":2,
+                        "joy_backward":0,
+                        "handedness": "right",
+                       "order":[
+                         "Parameter Selector:run='study-SMITH-2024-NEURO_session-behavioral.schedule'",
+                         "Horizon:run='study-NEURO_task-HZ_run-R1_R.schedule'",
+                         "Cooperation:run='study-NEURO_task-CO_run-1.schedule'"
+                          ]},
+              "PRACTICE-LEFT":{"scan": "False",
+                       "left":"left", 
+                       "right":"right", 
+                       "select":"space",
+                       "up":"up", 
+                       "down":"down",
+                       "joy_forward":2,
+                        "joy_backward":0,
+                        "handedness": "left",
+                       "order":[
+                         "Parameter Selector:run='study-SMITH-2024-NEURO_session-behavioral.schedule'",
+                         "Horizon:run='study-NEURO_task-HZ_run-PR_L.schedule'",
+                         "Cooperation:run='study-NEURO_task-CO_practice.schedule'"
+                          ]},
+              "PRACTICE-RIGHT":{"scan": "False",
+                       "left":"left", 
+                       "right":"right", 
+                       "select":"space",
+                       "up":"up", 
+                       "down":"down",
+                       "joy_forward":2,
+                        "joy_backward":0,
+                        "handedness": "right",
+                       "order":[
+                         "Parameter Selector:run='study-SMITH-2024-NEURO_session-behavioral.schedule'",
+                         "Horizon:run='study-NEURO_task-HZ_run-PR_R.schedule'",
+                         "Cooperation:run='study-NEURO_task-CO_practice.schedule'"
+                          ]}
+         }
+}
