@@ -50,6 +50,8 @@ ALIENS_CODE = 36
 ADJECTIVE_CODE = 37
 PLANNING_CODE = 38
 SLIDER_CODE = 39
+COOPERATION_CODE = 44
+HORIZON_CODE = 60
 TRIGGERBOX_PRE = 90
 TRIGGERBOX_POST = 91
 TASK_END = 99
@@ -101,12 +103,36 @@ def verify_parallel(session_params):
             break #seems to work
         else:
             myDlg = gui.Dlg(title="Parallel Port Address")
-            myDlg.addText('The parallel port check failed.  Verify the appropriate address in hardware manager, and enter it below.  You may also want to change this in the appropriate .params file.')
+            myDlg.addText('The parallel port check failed. VERIFY the appropriate address in hardware manager, and enter it below. You may also want to change this in the appropriate .params file.')
             myDlg.addField('Address', initial='0x' + format(address, '02x'))
+            myDlg.addField('SKIP this for testing purposes or APPLY the above value:', choices=["APPLY", "SKIP"])
             myDlg.show()  # show dialog and wait for OK or Cancel
             thisInfo = myDlg.data
+            print(thisInfo)
             address = ast.literal_eval(thisInfo[0])
             session_params['parallel_port_address'] = address
+            if "SKIP" in thisInfo:
+                break
+def verify_serial(session_params):
+    address = session_params['serial_port_address']
+    ser = serial.Serial(address, session_params['baud_rate'], timeout=1, write_timeout=1)
+    while True:
+        if check_one_serial_address(ser):
+            # close the connection after successful test
+            ser.close()
+            break #seems to work
+        else:
+            myDlg = gui.Dlg(title="Serial Port Address")
+            myDlg.addText('The serial port check failed. VERIFY the appropriate address in hardware manager, and enter it below. You may also want to change this in the appropriate .params file.')
+            myDlg.addField('Address', initial='COM1')
+            myDlg.addField('SKIP this for testing purposes or APPLY the above value:', choices=["APPLY", "SKIP"])
+            myDlg.show()  # show dialog and wait for OK or Cancel
+            thisInfo = myDlg.data
+            print(thisInfo)
+            address = thisInfo[0]
+            session_params['serial_port_address'] = address
+            if "SKIP" in thisInfo:
+                break
                 
     
 def check_one_parallel_address(address):
@@ -118,11 +144,26 @@ def check_one_parallel_address(address):
     parallel_writer.Out32(address, 0) #reset to 0
     print('PARALLEL PORT SUCCESS')
     return True
+
+def check_one_serial_address(ser):
+    try:
+        for i in range(256):
+            i = bytes.fromhex(format(i, '02X'))
+            ser.write(i)
+        print('SERIAL PORT SUCCESS')
+    except Exception as e:
+        print('SERIAL PORT FAILURE')
+        print(e)
+        return False
+    return True
     
     
 def write_parallel(port, value):
     parallel_writer.Out32(port, value)# 0x3000, value)
     #wait a short time
+def write_serial(ser, value):
+    ser.write(value)
+    pass
     
 def task_start(value, g): #g should have a clock (to reset) 
     #this function should be called when the task title screen is shown
@@ -152,6 +193,13 @@ def task_start(value, g): #g should have a clock (to reset)
         write_parallel(g.session_params['parallel_port_address'], value + 128)
         core.wait(PARALLEL_DELAY)
         write_parallel(g.session_params['parallel_port_address'], 128)
+    if g.session_params['signal_serial']:
+        ser = serial.Serial(g.session_params['serial_port_address'], g.session_params['baud_rate'], timeout=1)
+        g.clock.reset()
+        write_serial(ser, bytes.fromhex(format(255, '02X'))) # 255 for task start
+        write_serial(ser, bytes.fromhex(format(int(value), '02X'))) # task code
+        write_serial(ser, bytes.fromhex(format(0, '02X'))) # zero out
+        pass
     if g.session_params['record_video']:
         #print pyo.pa_get_input_devices()
         #print pyo.pa_get_default_input()
@@ -186,6 +234,9 @@ def task_end(g): #status of the task that just ended--do not show the 'break' sc
 
     if g.session_params['signal_parallel']:
         write_parallel(g.session_params['parallel_port_address'], 0)
+    if g.session_params['signal_serial']:
+        ser = serial.Serial(g.session_params['serial_port_address'], g.session_params['baud_rate'], timeout=1)
+        write_serial(ser, bytes.fromhex(format(254, '02X'))) # 254 for task end
     if g.session_params['record_video']:
         #gv.mic.stop() #stop recording audio
         #insert flac command here--or at the very end before copying files?
@@ -199,18 +250,24 @@ def task_end(g): #status of the task that just ended--do not show the 'break' sc
     if g.win:
         if g.status == 0:
             try:
-                show_instructions(g.win, ['Run complete: please wait for instructions.'])
+                if 'study-GUEGUEN-2023-COBRE2' not in g.session_params['output_dir']:
+                    show_instructions(g.win, ['Run complete: please wait for instructions.'])
+                else:
+                    show_instructions(g.win, ['Run complete: please wait for experimenter.'])
             except QuitException:
                 g.status = -1
         g.win.close()
 
-def mark_event(fout, trial, trial_type, event_id, event_time, response_time, response, result, write_to_parallel, address):
+def mark_event(fout, trial, trial_type, event_id, event_time, response_time, response, result, write_to_parallel, address, write_to_serial = False, serial_address='COM1', baud_rate = '115200'):
     fout.write(str(trial) + ',' + str(trial_type) + ',' + str(event_id) + ',' + str(event_time) + ',' + str(response_time) + ',' + str(response) + ',' + str(result) + '\n') 
     fout.flush() #always flush, so you still have output if python isn't exited cleanly
     if write_to_parallel:
         write_parallel(address, int(event_id) + 128 + 64) #mark the event (128 is task on, 64 is event occurring, event_id is the type of event (stored in the least significant 6 bits)
         core.wait(PARALLEL_DELAY) 
         write_parallel(address, 128) #now just set the task on bit, but set all others to 0
+    if write_to_serial:
+        ser = serial.Serial(serial_address, baud_rate, timeout=1)
+        write_serial(ser, bytes.fromhex(format(int(event_id), '02X')))
 
 def show_slides(slides, win):
     #slides should be a list of images to draw--draw them one after another and wait for keys before continuing
@@ -347,7 +404,43 @@ def wait_scan_start(win, five_only = False):
         if k[0] == 'escape':
             raise QuitException()
    
-  
+
+def wait_enter_start(win):
+    #show "In Preparation" in msg in win, wait for a 'z' after the scanner is prepped, then wait for a 't' to start the task
+    # Force Black Screen
+    win.setColor('black')
+    win.flip()
+    if win.winType == 'pyglet':
+        msg = visual.TextStim(win,text="",units='pix',pos=[0,0],color='white',height=30,wrapWidth=int(1600)) #text color should be opposite of window color
+        msg2 = visual.TextStim(win,text="",units='pix',pos=[0,-200],color='white' ,height=20,wrapWidth=int(1600))
+    if win.winType == 'pygame':
+        msg = visual.TextStim(win,text="",units='norm',pos=[0,0],color='white', alignHoriz = 'center') #text color should be opposite of window color
+        msg2 = visual.TextStim(win,text="",units='norm',pos=[0,-0.8],color='white', alignHoriz = 'center')
+    
+    #Wait for experimenter to press enter
+    # Keys allowed
+    keys_list = ['escape']
+    keys_list.append('return')
+    msg2.setText('(Waiting for ENTER to start)')
+    
+    msg.setText('Task will begin soon')
+    msg.draw()
+    msg2.draw()
+    win.flip()
+
+    if win.winType == 'pygame':
+        while True:
+            event.clearEvents()
+            time.sleep(.5)
+            key = event.getKeys(keys_list)
+            if key:
+                if key[0] == 'escape': raise QuitException()
+                break
+    else:
+        k = event.waitKeys(keyList = keys_list)
+        if k[0] == 'escape':
+            raise QuitException()
+
 def wait_start(win):
     #just display a message and wait for 3 seconds before starting
     win.setColor('black')
@@ -505,6 +598,119 @@ def do_one_slide_keyselect(slide, directory, g):
         retval = 1
     if k[0] == 'escape':
         raise QuitException()
+    return retval
+
+def run_instructions_mouse(instruct_schedule_file, g):
+    #instructions from schedule file along with audio
+    #this version allows you to use the mouse
+    directory = os.path.dirname(instruct_schedule_file)
+    fin = open(instruct_schedule_file, 'r')
+    lines = fin.readlines()
+    fin.close()
+    slides = []
+    for i in lines:
+        slides.append(i.split(','))
+    i = 0
+    g.mouse_toggle = False
+    while i < len(slides):
+        # resp = g.mouse.getPressed()
+        # if resp[0] == 0 and resp[2] == 0 and mouse_toggle:
+        #     mouse_toggle = False
+        print('going into function')
+        print('     mouse toggle: ' + str(g.mouse_toggle))
+        i = max(i + do_one_slide_mouse(slides[i], directory, g), 0) #do_one_slide may increment or decrement i, depending on whether session_params['right'] or session_params['left'] is pressed--don't let them go back on the first slide
+
+def do_one_slide_mouse(slide, directory, g):
+    image = visual.ImageStim(g.win, image=os.path.join(directory, slide[0]))
+    if slide[1] == 'None':
+        s = None
+    else:
+        print("LOADING SOUND: " + os.path.join(directory, slide[1]) )
+        if len(slide) == 4 and slide[3] != 'None': #optional volume parameter
+            s = sound.Sound(value = os.path.join(directory, slide[1]), volume=float(slide[3]))
+        else:
+            s = sound.Sound(value = os.path.join(directory, slide[1]), volume=g.session_params['instruction_volume'])
+    # if len(slide) == 5 and slide[4].strip() != 'None': #must have volume parameter to have keyselect--not the cleanest way to do this. The volume parameter can be None though, meaning use the session_param
+    #     advance_key = slide[4].strip() #remove newline
+    # else:
+    #     advance_key = g.session_params['right']
+    advance_time = float(slide[2])
+    #if it's -1, don't advance, if it's 0, advance at the end of the sound, if it's positive, advance after that amount of time
+    wait_z = False
+    if advance_time == -1:
+        advance_time = float('inf')
+    elif advance_time == 0:
+        try:
+            advance_time = s.getDuration()
+        except AttributeError: #in case there is a None instead of a sound, just set duration to 0.5
+            advance_time = 0.5
+    elif advance_time == -2: #wait for a 'z' to advance
+        advance_time = float('inf')
+        wait_z = True
+    
+    image.draw()
+    g.win.flip()
+    k = None #initialize k
+    if s:
+        s.play()
+        advance_time = advance_time - s.getDuration() #since we're waiting for the duration of s, decrease advance_time by that amount--allows for e.g. advance_time of 5s with a sound of 3s->wait 2s after the sound ends
+        k = event.waitKeys(keyList = ['z', 'a', 'escape'], maxWait=s.getDuration()) #force the subject to listen to all of the instructions--allow 'z' to skip them or 'a' to force back
+    if not k: #if skipped instructions, don't wait to advance afterword
+        if g.session_params['allow_instructions_back']: #only allow back if it's specified in the session parameters
+            kl = ['escape', 'z', 'a']
+        else:
+            kl = ['escape', 'z', 'a']
+        if wait_z: #only advance for a 'z'
+            kl = ['z', 'a']
+    
+        # k = event.waitKeys(keyList = kl, maxWait=advance_time)
+    
+    done_with_slide = False
+    if advance_time > 0 and advance_time < float('inf'):
+        k = event.waitKeys(keyList = kl, maxWait=advance_time)
+        return 1
+    # g.mouse.clickReset()
+    while not done_with_slide and advance_time == float('inf'):
+        k = event.getKeys(keyList = kl)
+        resp = g.mouse.getPressed()
+        if resp[0] == 0 and resp[2] == 0 and g.mouse_toggle:
+            print('setting to False')
+            g.mouse_toggle = False
+        # resp = g.mouse.getPressed()
+        # if resp[0] == 0 and resp[2] == 0 and mouse_toggle:
+        #     mouse_toggle = False
+
+        if s: #stop the sound if it's still playing
+            s.stop()
+        if k:
+            if k == None: #event timeout
+                return 1
+            if k[0] == 'z':
+                done_with_slide = True
+                retval = 1
+            if k[0] == 'a':
+                done_with_slide = True
+                retval = -1
+            if k[0] == 'escape':
+                done_with_slide = True
+                raise QuitException()
+        # print(resp)
+        # print(mouse_toggle)
+        if resp != [0,0,0]:
+            print(resp)
+            print(g.mouse_toggle)
+            if resp[0] == 1 and not g.mouse_toggle:
+                done_with_slide = True
+                print('setting to True')
+                g.mouse_toggle = True
+                retval = -1
+            if resp[2] == 1 and not g.mouse_toggle:
+                done_with_slide = True
+                print('setting to True')
+                g.mouse_toggle = True
+                retval = 1
+        short_wait()
+        g.mouse.clickReset()
     return retval
 
 def load_inst_sounds(slides,directory,g):

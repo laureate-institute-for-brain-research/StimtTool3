@@ -25,7 +25,7 @@ import FearConditioning.FearConditioning
 #import Questionnaire.Questionnaire
 import ColdPressor.ColdPressor 
 import HeartbeatCounting.HeartbeatCounting
-#import BreathHold.BreathHold  
+#import BreathHold.BreathHold
 #import BreathHoldV2.BreathHoldV2
 import Rest.Rest
 import DrugStressReactivity.DrugStressReactivity
@@ -53,6 +53,8 @@ import Adjective.Adjective
 import PlanningTask.PlanningTask
 import Slider.Slider
 import Rest_bb.Rest
+import Cooperation.Cooperation
+import Horizon.Horizon
 
 
 #mod_mapping = {'Monetary Incentive Delay':MonetaryIncentiveDelay.MonetaryIncentiveDelay, 'Physiological Baseline':Baseline.Baseline, 'Emotional Reactivity':EmotionalReactivity.EmotionalReactivity, 'Breath Hold':BreathHold.BreathHold,
@@ -91,7 +93,9 @@ mod_mapping = {
     'Adjective': Adjective.Adjective,
     'Planning Task': PlanningTask.PlanningTask,
     'Rest_bb': Rest_bb.Rest,
-    'Slider': Slider.Slider
+    'Slider': Slider.Slider,
+    'Cooperation':Cooperation.Cooperation,
+    'Horizon': Horizon.Horizon
     }
 
 def run_task_until_success(task, session_params):
@@ -128,10 +132,16 @@ def run_task_until_success(task, session_params):
                 elif thisInfo[0] == 'SKIP TO': #user picked skip to--return 2 to signal to prompt the user with a list to skip to
                     return 2
                 elif thisInfo[0] == 'SWAP SCREEN': #stimulus is showing up on the wrong screen--so swap from 1 to 0. This started happening on some laptops sometimes ~6/2019
-                    if session_params['screen_number'] == 1:
-                        session_params['screen_number'] = 0
+                    screenDlg = gui.Dlg(title="Please enter the desired display screen number.")
+                    screenDlg.addField('Screen #:', choices=[0,1,2], tip='0 is the primary monitor')
+                    screenDlg.show()  # show dialog and wait for OK or Cancel
+                    if myDlg.OK:
+                        screenInfo = screenDlg.data
+                        print(screenInfo)
+                        session_params['screen_number'] = int(screenInfo[0])
                     else:
-                        session_params['screen_number'] = 1
+                        print('QUITTING!')
+                        return True #say switched task->will start free mode, one more escape to quit
                     continue
                 else:
                     switched = True #otherwise set it to free mode
@@ -208,6 +218,8 @@ if __name__ == '__main__':
         StimToolLib.redirect_output(session_params)
     if session_params['signal_parallel']: #if using the parallel port, make sure it's working
         StimToolLib.verify_parallel(session_params)
+    if session_params['signal_serial']: #if using the parallel port, make sure it's working
+        StimToolLib.verify_serial(session_params)
     
     if session_params['scan']:
         StimToolLib.get_exam_number(session_params) #if it's a scanning session, save the exam number (e.g. S2352)
@@ -215,7 +227,6 @@ if __name__ == '__main__':
     if session_params['record_video']: #start the camera
         if not CD.start_and_test_camera():
             StimToolLib.error_popup('ERROR: CAMERA IS NOT WORKING PROPERLY.  UNPLUG THE CAMERA FROM THE USB PORT AND PLUG IT BACK IN, THEN RESTART')
-
     
     
     

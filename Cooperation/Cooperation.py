@@ -681,7 +681,7 @@ def run_try():
     sorted_events = sorted(event_types.items(), key=lambda item: item[1])
     g.output.write('Administrator:,' + g.session_params['admin_id'] + ',Original File Name:,' + fileName + ',Time:,' + start_time + ',Parameter File:,' +  param_file + ',Event Codes:,' + str(sorted_events) + '\n')
     g.output.write('trial_number,trial_type,event_code,absolute_time,response_time,response,result\n')
-    StimToolLib.task_start(StimToolLib.FLIGHT_INIT_DIST_CODE, g)
+    StimToolLib.task_start(StimToolLib.COOPERATION_CODE, g)
     instruct_start_time = g.clock.getTime()
     StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['INSTRUCT_ONSET'], instruct_start_time, 'NA', 'NA', 'NA', g.session_params['signal_parallel'], g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
 

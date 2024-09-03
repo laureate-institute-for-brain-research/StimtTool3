@@ -6,8 +6,11 @@ select space
 scan False
 record_video False
 signal_parallel False
+signal_serial False
 auto_advance False
 parallel_port_address 0x3000
+serial_port_address COM1
+baud_rate 115200
 screen_x 1024
 screen_y 768
 monitor_width_cm 51.75
@@ -18,8 +21,8 @@ instruction_volume 0.2
 allow_instructions_back True
 output_dir 'C:/T1000_Temporary_Storage/default/'
 network_output_dir 'T:/data/original_data/calibration_parameters/'
-last_subject 'artest'
-last_admin 'ar'
+last_subject 'ar000'
+last_admin 'AR'
 redirect_output False
 session_id SESSION_ID
 screen_number 1
