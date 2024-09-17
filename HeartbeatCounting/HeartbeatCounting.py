@@ -71,7 +71,7 @@ def get_vas_ratings():
         rating_start_time = g.clock.getTime()
         this_rating = StimToolLib.get_one_vas_rating(g, txt)
         now = g.clock.getTime()
-        StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['VAS_RATING'], now, now - rating_start_time, str(this_rating), txt, g.session_params['signal_parallel'], g.session_params['parallel_port_address'])
+        StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['VAS_RATING'], now, now - rating_start_time, str(this_rating), txt, g.session_params['signal_parallel'], g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
         
        
         
@@ -83,7 +83,7 @@ def do_one_trial(trial_type, duration):
     #k = event.waitKeys(keyList = [g.session_params['right'], 'escape'])
     #if k[0] == 'escape':
     #    raise StimToolLib.QuitException()
-    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_INSTRUCT_ONSET'], g.clock.getTime(),  'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_INSTRUCT_ONSET'], g.clock.getTime(),  'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     
     StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', g.instructions[trial_type]), g)
     
@@ -139,7 +139,7 @@ def do_one_trial(trial_type, duration):
         pass
     
     start_time = g.clock.getTime()
-    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_ONSET'], start_time,  'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_ONSET'], start_time,  'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     trial_taps = 0
     down_time = start_time #keep track of the last time the subject's finger touched down
     up_time = start_time #allow for the subject's finger to start on or off the vMeter
@@ -153,7 +153,7 @@ def do_one_trial(trial_type, duration):
         if now-start_time >= next_tone: #if it's time to play a tone, play it and setup for the next one
             now = g.clock.getTime()
             g.tone.play()
-            StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TONE'], now, 'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
+            StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TONE'], now, 'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
             if tone_times: #grab the next tone time
                 next_tone = tone_times.pop()
             else: #all tones have been played
@@ -162,12 +162,12 @@ def do_one_trial(trial_type, duration):
             raise StimToolLib.QuitException()
         k = event.getKeys([g.session_params['down'], g.session_params['up'], g.session_params['left'], g.session_params['right']])
         if k:
-            StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TAP'], now, 'NA', k[0], 'NA', True, g.session_params['parallel_port_address'])
+            StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TAP'], now, 'NA', k[0], 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
             trial_taps = trial_taps + 1
 
             
     stop_time = g.clock.getTime() #end time for this trial (right after a tap could have been recorded)  This will be slightly before the screen changes (~10ms)
-    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_COMPLETE'], stop_time, stop_time - start_time, trial_taps, 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['TRIAL_COMPLETE'], stop_time, stop_time - start_time, trial_taps, 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     g.subject_taps = trial_taps
     #g.session_params['vMeter'].clear() #turn off the lights
     g.stop.draw()
@@ -178,7 +178,7 @@ def do_one_trial(trial_type, duration):
     if k[0] == 'escape':
         raise StimToolLib.QuitException()
     now = g.clock.getTime() 
-    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['STOP_SCREEN_END'], now, now - stop_time, 'NA', 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, g.trial, g.trial_type, event_types['STOP_SCREEN_END'], now, now - stop_time, 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     get_vas_ratings()
 
 def run(session_params, run_params):
@@ -289,12 +289,12 @@ def run_try():
 
     
     instruct_start_time = g.clock.getTime()
-    StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['INSTRUCT_ONSET'], instruct_start_time, 'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['INSTRUCT_ONSET'], instruct_start_time, 'NA', 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     #show_intro_instructions()
     StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', g.run_params['instruction_schedule']), g)
     # StimToolLib.run_instructions(os.path.join(os.path.dirname(__file__), 'media', 'instructions', 'HC_instruct_schedule.csv'), g)
     instruct_end_time = g.clock.getTime()
-    StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['TASK_ONSET'], instruct_end_time, instruct_end_time - instruct_start_time, 'NA', 'NA', True, g.session_params['parallel_port_address'])
+    StimToolLib.mark_event(g.output, 'NA', 'NA', event_types['TASK_ONSET'], instruct_end_time, instruct_end_time - instruct_start_time, 'NA', 'NA', True, g.session_params['parallel_port_address'], g.session_params['signal_serial'], g.session_params['serial_port_address'], g.session_params['baud_rate'])
     g.trial = 0
     for t, d in zip(trial_types, durations):
         g.trial_type = int(t)
