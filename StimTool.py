@@ -25,7 +25,7 @@ import FearConditioning.FearConditioning
 #import Questionnaire.Questionnaire
 import ColdPressor.ColdPressor 
 import HeartbeatCounting.HeartbeatCounting
-#import BreathHold.BreathHold
+import BreathHold.BreathHold
 #import BreathHoldV2.BreathHoldV2
 import Rest.Rest
 import DrugStressReactivity.DrugStressReactivity
@@ -95,7 +95,8 @@ mod_mapping = {
     'Rest_bb': Rest_bb.Rest,
     'Slider': Slider.Slider,
     'Cooperation':Cooperation.Cooperation,
-    'Horizon': Horizon.Horizon
+    'Horizon': Horizon.Horizon,
+    'Breath Hold': BreathHold.BreathHold
     }
 
 def run_task_until_success(task, session_params):

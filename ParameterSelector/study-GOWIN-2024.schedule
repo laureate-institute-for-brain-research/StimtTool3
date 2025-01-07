@@ -1,0 +1,27 @@
+{
+ "Hand-Set":{"RIGHT-SCAN":{"scan": "False",
+                       "left":"left", 
+                       "right":"right", 
+                       "select":"space",
+                       "down":"down",
+                       "handedness": "right",
+                       "order":[
+                         "Parameter Selector:run='study-GOWIN-2024.schedule'",
+                         "Breath Hold:run='GOWIN_BH_TX_R1.schedule'",
+                         "Interoceptive Awareness:run='T1000_IA_T0_Random1_RIGHT.schedule'",
+                         "Interoceptive Awareness:run='T1000_IA_T0_Random2_RIGHT.schedule'"
+                          ]},
+         "LEFT-SCAN":{"scan": "False",
+                      "left":"left", 
+                      "right":"right", 
+                      "select":"space",
+                      "down":"down",
+                      "handedness": "left",
+                      "order":[
+                         "Parameter Selector:run='study-GOWIN-2024.schedule'",
+                         "Breath Hold:run='GOWIN_BH_TX_R1.schedule'",
+                         "Interoceptive Awareness:run='T1000_IA_T0_Random1_LEFT.schedule'",
+                         "Interoceptive Awareness:run='T1000_IA_T0_Random2_LEFT.schedule'"
+                          ]}
+         }
+}
